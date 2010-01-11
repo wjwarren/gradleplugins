@@ -5,8 +5,11 @@ buildscript {
 		flatDir(dirs: "../../../../build/libs")
 	} 
     dependencies {
-        classpath ':pdePlugin:1.0' 
+        classpath ':pdePlugin:1.0'
     } 
+}
+dependencies {
+    targetPlatform name: 'eclipse-SDK', version: '3.5.1', classifier: 'macosx-cocoa', ext: 'tar.gz'
 }
 
 configure(productPde){	
@@ -24,3 +27,4 @@ configure(productPde){
 	pdeBuildPluginVersion = "3.5.1.R35x_20090820"
 	productName = "/ProductOnPluginsExample/simplemailproduct.product"	
 }
+

@@ -26,6 +26,8 @@ package com.thalesgroup.gradle.pde;
 import java.util.HashMap;
 import java.util.Map;
 
+import com.thalesgroup.gradle.pde.tasks.ResolveTargetPlatformTask;
+import org.apache.ivy.plugins.resolver.URLResolver;
 import org.gradle.api.Action;
 import org.gradle.api.Plugin;
 import org.gradle.api.Project;
@@ -41,22 +43,35 @@ import com.thalesgroup.gradle.pde.tasks.product.ResourceProductTask;
 
 public class ProductPdeBuild implements Plugin<Project> {
 
-    public static final String CLEAN_TASK_NAME             = "clean";
-    public static final String INIT_TASK_NAME              = "init";
-    public static final String PROCESS_RESOURCES_TASK_NAME = "processResources";
-    public static final String PDE_BUILD_TASK_NAME         = "pdeBuild";    
-    public static final String DEPLOY_TASK_NAME            = "deploy";
+    public static final String CLEAN_TASK_NAME                              = "clean";
+    public static final String INIT_TASK_NAME                               = "init";
+    public static final String PROCESS_RESOURCES_TASK_NAME                  = "processResources";
+    public static final String PDE_BUILD_TASK_NAME                          = "pdeBuild";
+    public static final String DEPLOY_TASK_NAME                             = "deploy";
+    public static final String RESOLVE_TARGET_PLATFORM_TASK_NAME            = "resolveTargetPlatform";                     
+    public static final String ECLIPSE_TARGET_PLATFORM_CONFIGURATION_NAME   = "targetPlatform";
+    public static final String ECLIPSE_TARGET_PLATFORM_RESOLVER_NAME = ECLIPSE_TARGET_PLATFORM_CONFIGURATION_NAME + "_resolver";
 
-    public void use(final Project project) {
+    public static final String DEFAULT_ECLIPSE_URL_ARTIFACTPATTERN =
+            //"http://mirror.netcologne.de/eclipse//eclipse/downloads/drops/R-3.5.1-200909170800/eclipse-SDK-3.5.1-macosx-cocoa.tar.gz
+            //"http://mirror.netcologne.de/eclipse//eclipse/downloads/drops/R-3.5.1-200909170800/eclipse-SDK-3.5.1-macosx-cocoa.jar
+
+            "http://mirror.netcologne.de/eclipse//eclipse/downloads/[type]/R-3.5.1-200909170800/[artifact]-[revision]-[classifier].[ext]";
+
+    public void use(Project project) {
 	   	HashMap<String, String> customValues = new HashMap<String,String>();
-	   	//project.setProperty("notification", config);
-		
-	   	ProductPdeConvention productPdeConvention = new ProductPdeConvention(project, customValues);
+
+
+        project.getConfigurations().add(ECLIPSE_TARGET_PLATFORM_CONFIGURATION_NAME).setVisible(false).setTransitive(true).
+                setDescription("The Distributions, libraries, and artifacts which build the target platform for the pde build.");
+
+        ProductPdeConvention productPdeConvention = new ProductPdeConvention(project, customValues);
         Convention convention = project.getConvention();
         convention.getPlugins().put("productPde", productPdeConvention);
 
         project.setProperty("productPde", productPdeConvention);
         configureClean(project, customValues);
+        configureDependencies(project, customValues);
         configureInit(project,customValues);
         configureProcessResources(project,customValues);
         configurePdeBuild(project,customValues);
@@ -86,6 +101,14 @@ public class ProductPdeBuild implements Plugin<Project> {
 				});
 		project.getTasks().add(INIT_TASK_NAME, InitProductTask.class).setDescription("Initialization...");
 	}
+
+    private void configureDependencies(final Project project, final Map<String, ?> customValues){
+        URLResolver targetPlatformResolver = new URLResolver();
+        targetPlatformResolver.setName(ECLIPSE_TARGET_PLATFORM_RESOLVER_NAME);
+        targetPlatformResolver.addArtifactPattern(DEFAULT_ECLIPSE_URL_ARTIFACTPATTERN);
+        project.getRepositories().add(targetPlatformResolver);
+        project.getTasks().add(RESOLVE_TARGET_PLATFORM_TASK_NAME, ResolveTargetPlatformTask.class);
+    }
 
 
     private void configureProcessResources(Project project, final Map<String, ?> customValues) {
