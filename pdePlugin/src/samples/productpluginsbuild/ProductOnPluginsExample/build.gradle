@@ -9,7 +9,8 @@ buildscript {
     } 
 }
 dependencies {
-    targetPlatform name: 'eclipse-SDK', version: '3.5.1', classifier: 'macosx-cocoa', ext: 'tar.gz'
+    targetPlatform name: 'eclipse-SDK', version: '3.5.1', classifier: 'win32', ext: 'zip'
+	targetPlatform name: 'eclipse', version: '3.5.1', classifier: 'delta-pack', ext: 'zip'
 }
 
 configure(productPde){	
@@ -21,10 +22,20 @@ configure(productPde){
 	builderDir = "${projectDir}/build"
 	base = "/Users/Rene/workspaces/gradle/github/"
 	buildId = "ProductOnPluginsExample"
-	baseLocation = "/Users/Rene/workspaces/gradle/github/eclipse"	
+	baseLocation = "${projectDir}/build/targetPlatform/eclipse"	
 	eclipseLocation = "/Users/Rene/workspaces/gradle/github/eclipse"
 	equinoxLauncherPluginVersion = "1.0.200.v20090520"
 	pdeBuildPluginVersion = "3.5.1.R35x_20090820"
 	productName = "/ProductOnPluginsExample/simplemailproduct.product"	
 }
 
+task assembleTargetPlatform(type: Copy) {
+    // assemble all dependencies to one Eclipse targetPlatform
+    configurations.targetPlatform.findAll{it.name.endsWith('.zip')}.each{
+		from zipTree(it)
+	}
+	configurations.targetPlatform.findAll{it.name.endsWith('.tar')}.each{
+		from tarTree(it)
+	}
+    into "${projectDir}/build/targetPlatform"
+}
