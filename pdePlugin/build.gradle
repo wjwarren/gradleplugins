@@ -16,7 +16,7 @@ task info << {
 
 
 group="com.thalesgroup.gradle.plugins" 
-org.apache.ivy.util.url.CredentialsStore.INSTANCE.addCredentials(realm, host, user, password)
+//org.apache.ivy.util.url.CredentialsStore.INSTANCE.addCredentials(realm, host, user, password)
 
 
 task sourceZip (type:Zip){
