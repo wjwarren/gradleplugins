@@ -59,9 +59,6 @@ class AntUtil {
 	String fileStr = fileSb.toString();
 	
 	replaceList.each{
-		println it
-		println it.key
-		println it.value
 		fileStr = fileStr.replaceAll(it.key, it.value);	
 	}
 
