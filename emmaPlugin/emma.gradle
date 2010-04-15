@@ -1,0 +1,46 @@
+apply plugin:'java'
+
+String EMMA_REPORT_PATH 			= "${reportsDir.absolutePath}/emma"
+String EMMA_COVERAGE_FILE_NAME_PATH	= "coverage"
+String EMMA_TMP_DIR					= "$buildDir/tmp/emma"
+String EMMA_INSTR_DIR				= EMMA_TMP_DIR + "/instr"
+String EMMA_META_DATA_FILEPATH 		= EMMA_TMP_DIR + "/metadata.emma"
+String EMMA_VERBOSITY_LEVEL 		= "quiet" 
+
+configurations{
+	emma
+}
+
+test{
+	//setup JVM Arguments for emma coverage 
+	jvmArgs "-Demma.coverage.out.file=$EMMA_META_DATA_FILEPATH", "-Demma.coverage.out.merge=true"
+	
+	//add 
+	doFirst{
+		ant.taskdef( resource:"emma_ant.properties", classpath: configurations.emma.asPath)
+		ant.path(id:"run.classpath"){
+			pathelement(location:sourceSets.main.classesDir.absolutePath ) 
+		}
+		ant.emma(verbosity:EMMA_VERBOSITY_LEVEL){
+			instr(merge:"true", destdir:EMMA_INSTR_DIR, instrpathref:"run.classpath", metadatafile:EMMA_META_DATA_FILEPATH){
+				instrpath{
+					fileset(dir:sourceSets.main.classesDir.absolutePath, includes:"*.class")
+				}
+			}
+			setClasspath(files(EMMA_INSTR_DIR) + getClasspath())
+		}
+	}
+	
+	doLast{
+		ant.emma(enabled:"true"){
+			report(sourcepath:"src/main/java"){
+				fileset(dir:EMMA_TMP_DIR){
+					include(name:"*.emma")
+				}
+				txt(outfile:"$EMMA_REPORT_PATH/coverage.txt")
+				html(outfile:"$EMMA_REPORT_PATH/coverage.html")
+				xml(outfile:"$EMMA_REPORT_PATH/coverage.xml")
+			}
+		}
+	}
+}

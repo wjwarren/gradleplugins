@@ -1,0 +1,19 @@
+apply plugin:'java'
+apply from:'../emma.gradle'
+
+repositories{
+    mavenCentral()
+}
+
+configurations{
+	emma
+}
+
+
+dependencies{
+  emma "emma:emma:2.0.5312"
+  emma "emma:emma_ant:2.0.5312"
+
+  testCompile "junit:junit:4.7"
+  testCompile "emma:emma:2.0.5312"
+}
