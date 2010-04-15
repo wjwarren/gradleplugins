@@ -5,7 +5,7 @@ String EMMA_COVERAGE_FILE_NAME_PATH	= "coverage"
 String EMMA_TMP_DIR					= "$buildDir/tmp/emma"
 String EMMA_INSTR_DIR				= EMMA_TMP_DIR + "/instr"
 String EMMA_META_DATA_FILEPATH 		= EMMA_TMP_DIR + "/metadata.emma"
-String EMMA_VERBOSITY_LEVEL 		= "quiet" 
+String EMMA_VERBOSITY_LEVEL 		= "info" 
 
 configurations{
 	emma
@@ -27,8 +27,8 @@ test{
 					fileset(dir:sourceSets.main.classesDir.absolutePath, includes:"*.class")
 				}
 			}
-			setClasspath(files(EMMA_INSTR_DIR) + getClasspath())
 		}
+		setClasspath(files(EMMA_INSTR_DIR) + configurations.emma +  getClasspath())
 	}
 	
 	doLast{
