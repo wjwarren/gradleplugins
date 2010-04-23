@@ -57,8 +57,14 @@ test{
 	}
 	
 	doLast{
+		ant.path(id:"src.path"){
+			sourceSets.main.java.srcDirs.each{
+				pathelement(location:it.absolutePath ) 
+			}
+		}
 		ant.emma(enabled:"true"){
-			report(sourcepath:"src/main/java"){
+			
+			report(sourcepath:"src.path"){
 				fileset(dir:"${emmaConvention.tmpDir}"){
 					include(name:"*.emma")
 				}
