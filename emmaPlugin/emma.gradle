@@ -64,7 +64,7 @@ test{
 		}
 		ant.emma(enabled:"true"){
 			
-			report(sourcepath:"src.path"){
+			report(sourcepathref:"src.path"){
 				fileset(dir:"${emmaConvention.tmpDir}"){
 					include(name:"*.emma")
 				}
