@@ -1,0 +1,60 @@
+apply plugin: 'groovy'
+
+configurations {
+    easyb
+}
+
+repositories {
+    mavenCentral()
+}
+
+dependencies {
+    groovy('org.codehaus.groovy:groovy-all:1.7.5')
+    easyb('org.easyb:easyb:0.9.8')
+}
+
+def easybConvention = new EasybPluginConvention(project)
+project.convention.plugins.easyb = easybConvention
+
+class EasybPluginConvention{
+    def behaviorsDir
+    def reportsPath
+
+    def easyb(Closure close){
+        close.delegate = this
+        close.run()
+    }
+
+    EasybPluginConvention(Project project){
+        reportsPath = "${project.reportsDir.absolutePath}/easyb"
+        behaviorsDir = "${project.file('src/test/easyb')}"
+    }
+}
+
+test.doLast {
+    ant.taskdef(name: "easyb", classname: "org.easyb.ant.BehaviorRunnerTask", classpath: configurations.easyb.asPath)
+
+    mkdir(easybConvention.reportsPath + "/plain")
+    mkdir(easybConvention.reportsPath + "/html")
+    mkdir(easybConvention.reportsPath + "/xml")
+
+    ant.easyb(failureProperty: 'easyb.failed') {
+        classpath {
+            pathelement(path: configurations.runtime.asPath)
+            pathelement(path: configurations.easyb.asPath)
+            pathelement(location: sourceSets.main.classesDir.absolutePath)
+        }
+        report(format: 'txtstory', location: easybConvention.reportsPath + "/plain/easyb-stories.txt")
+        report(format: 'html',     location: easybConvention.reportsPath + "/html/easyb-report.html")
+        report(format: 'xml',      location: easybConvention.reportsPath + "/xml/easyb-report.xml")
+
+        behaviors(dir: easybConvention.behaviorsDir) {
+             include(name: '**/*Story.groovy')
+             include(name: '**/*Specification.groovy')
+        }
+    }
+
+    if(ant.project.properties['easyb.failed']) {
+        println "NOOOOO!"
+    }
+}
