@@ -1,0 +1,13 @@
+//apply from:'http://github.com/breskeby/gradleplugins/raw/0.9-upgrade/aspectjPlugin/aspectJ.gradle'
+apply from:'file:///Users/Rene/workspaces/gradle/github/gradleplugins/aspectjPlugin/aspectJ.gradle'
+
+repositories {
+    mavenCentral()
+}
+
+dependencies{
+	ajc "aspectj:aspectjtools:1.5.3"
+	compile "aspectj:aspectjrt:1.5.3"
+	testCompile "junit:junit:4.7"
+	testCompile "org.mockito:mockito-all:1.8.2"
+}

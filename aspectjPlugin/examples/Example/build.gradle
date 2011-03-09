@@ -1,4 +1,4 @@
-apply url:'http://github.com/breskeby/gradleplugins/raw/0.9-upgrade/aspectjPlugin/aspectJ.gradle'
+apply from:'file///Users/Rene/workspaces/gradle/github/gradleplugins/aspectjPlugin/aspectJ.gradle'
 
 repositories {
     mavenCentral()
