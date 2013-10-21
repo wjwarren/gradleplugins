@@ -1,5 +1,5 @@
-//apply from:'http://github.com/breskeby/gradleplugins/raw/0.9-upgrade/aspectjPlugin/aspectJ.gradle'
-apply from:'file:///Users/Rene/workspaces/gradle/github/gradleplugins/aspectjPlugin/aspectJ.gradle'
+apply plugin: "java"
+apply from:'../../../aspectJ.gradle'
 
 repositories {
     mavenCentral()
