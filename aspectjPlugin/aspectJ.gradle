@@ -2,6 +2,7 @@ configurations {
 	ajc
 	aspects
 	ajInpath
+	ajSourceRoots
 }
 
 task compileJava(dependsOn: JavaPlugin.PROCESS_RESOURCES_TASK_NAME, overwrite: true)  {
@@ -32,6 +33,57 @@ task compileTestJava(dependsOn: JavaPlugin.PROCESS_TEST_RESOURCES_TASK_NAME, ove
 			sourceroots{
 				sourceSets.main.java.srcDirs.each{
 					pathelement(location:it.absolutePath)
+				}
+			}
+		}
+	}
+}
+
+// Only enable when the Android plugin is used.
+if (hasProperty("android")) {
+	def variants;
+
+	if (android.hasProperty("applicationVariants")) {
+		variants = android.applicationVariants;
+	}
+
+	if (android.hasProperty("libraryVariants")) {
+		variants = android.libraryVariants;
+	}
+
+	// Taken from http://stackoverflow.com/a/19307427
+	variants.all { variant ->
+
+		variant.javaCompile.doLast {
+			def androidSdk = android.adbExe.parent + "/../platforms/" + android.compileSdkVersion + "/android.jar"
+
+			def iajcClasspath = configurations.compile.asPath + ";" + androidSdk
+			configurations.compile.dependencies.each { dep ->
+				if(dep.hasProperty("dependencyProject")) {
+					iajcClasspath += ":" + dep.dependencyProject.buildDir + "/bundles/release/classes.jar"
+				}
+			}
+
+			ant.taskdef( resource:"org/aspectj/tools/ant/taskdefs/aspectjTaskdefs.properties", classpath: configurations.ajc.asPath)
+			ant.iajc (
+					source:sourceCompatibility,
+					target:targetCompatibility,
+					destDir:"${project.buildDir}/classes/${variant.dirName}",
+					maxmem:"512m",
+					fork:"true",
+					aspectPath:configurations.aspects.asPath,
+					inpath:configurations.ajInpath.asPath,
+					sourceRootCopyFilter:"**/.svn/*,**/*.java",
+					classpath:iajcClasspath
+			){
+				sourceroots{
+					// Looping over "sourceSets.main.java.srcDirs.each" seems to include some
+					// false folders when using a non-standard folder structure.
+					// For this reason you need to set "ajSourceRoots" in your dependencies.
+					configurations.ajSourceRoots.each {File file ->
+						pathelement(location:file.absolutePath);
+					}
+					pathelement(location:"${project.buildDir}/source/r/${variant.dirName}")
 				}
 			}
 		}
