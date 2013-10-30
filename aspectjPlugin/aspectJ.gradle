@@ -49,7 +49,9 @@ task compileJava(dependsOn: JavaPlugin.PROCESS_RESOURCES_TASK_NAME, overwrite: t
 				fork: "true", 
 				aspectPath: getAspectPaths(),
 				inpath: getInPaths(),
-				classpath: configurations.compile.asPath
+				classpath: configurations.compile.asPath,
+				includes: aspectj.ajIncludes,
+				excludes: aspectj.ajExcludes,
 		){
 			srcdir {
 				sourceSets.main.java.srcDirs.each{
@@ -73,7 +75,9 @@ task compileTestJava(dependsOn: JavaPlugin.PROCESS_TEST_RESOURCES_TASK_NAME, ove
 				fork: "true", 
 				aspectPath: getAspectPaths(),
 				inpath: getInPaths(),
-				classpath: configurations.compile.asPath
+				classpath: configurations.compile.asPath,
+				includes: aspectj.ajIncludes,
+				excludes: aspectj.ajExcludes,
 		){
 			srcdir {
 				sourceSets.main.java.srcDirs.each{
@@ -120,7 +124,7 @@ if (hasProperty("android")) {
 					inpath: getInPaths(),
 					classpath: iajcClasspath,
 					includes: aspectj.ajIncludes,
-					//excludes: aspectj.ajExcludes
+					excludes: aspectj.ajExcludes,
 			){
 				srcdir {
 					// Looping over "sourceSets.main.java.srcDirs.each" seems to include some
