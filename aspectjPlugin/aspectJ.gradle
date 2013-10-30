@@ -1,8 +1,39 @@
+// TODO: Create a "proper" plugin.
+project.extensions.create("aspectj", AspectJPluginExtension)
+
+class AspectJPluginExtension {
+	// TODO: Figure out how to set this one in a build script.
+	//ExternalDependency ajc
+
+	FileCollection aspects
+	FileCollection ajInpath
+	FileCollection ajSourceDirectories
+
+	// TODO: For some reason, adding any excludes will exclude everything...
+	String ajIncludes = ""
+	String ajExcludes = ""
+}
+
 configurations {
 	ajc
-	aspects
-	ajInpath
-	ajSourceRoots
+}
+
+private def getAspectPaths() {
+	String aspectPaths = ""
+	if (aspectj.aspects != null) {
+		aspectPaths = aspectj.aspects.asPath
+	}
+
+	return aspectPaths;
+}
+
+private def getInPaths() {
+	String inPaths = ""
+	if (aspectj.ajInpath != null) {
+		inPaths = aspectj.ajInpath.asPath
+	}
+
+	return inPaths;
 }
 
 task compileJava(dependsOn: JavaPlugin.PROCESS_RESOURCES_TASK_NAME, overwrite: true)  {
@@ -10,10 +41,17 @@ task compileJava(dependsOn: JavaPlugin.PROCESS_RESOURCES_TASK_NAME, overwrite: t
 
 	doLast{
 		ant.taskdef( resource:"org/aspectj/tools/ant/taskdefs/aspectjTaskdefs.properties", classpath: configurations.ajc.asPath)
-		ant.iajc(source:sourceCompatibility, target:targetCompatibility, destDir:sourceSets.main.output.classesDir.absolutePath, maxmem:"512m", fork:"true", 
-			aspectPath:configurations.aspects.asPath, inpath:configurations.ajInpath.asPath, sourceRootCopyFilter:"**/.svn/*,**/*.java",classpath:configurations.compile.asPath){
-
-			sourceroots{
+		ant.iajc(
+				source: sourceCompatibility,
+				target: targetCompatibility,
+				destDir: sourceSets.main.output.classesDir.absolutePath,
+				maxmem: "512m",
+				fork: "true", 
+				aspectPath: getAspectPaths(),
+				inpath: getInPaths(),
+				classpath: configurations.compile.asPath
+		){
+			srcdir {
 				sourceSets.main.java.srcDirs.each{
 					pathelement(location:it.absolutePath)
 				}
@@ -27,10 +65,17 @@ task compileTestJava(dependsOn: JavaPlugin.PROCESS_TEST_RESOURCES_TASK_NAME, ove
 
 	doLast{
 		ant.taskdef( resource:"org/aspectj/tools/ant/taskdefs/aspectjTaskdefs.properties", classpath: configurations.ajc.asPath)
-		ant.iajc(source:sourceCompatibility, target:targetCompatibility, destDir:sourceSets.main.output.classesDir.absolutePath, maxmem:"512m", fork:"true", 
-			aspectPath:configurations.aspects.asPath, inpath:configurations.ajInpath.asPath, sourceRootCopyFilter:"**/.svn/*,**/*.java",classpath:configurations.compile.asPath){
-
-			sourceroots{
+		ant.iajc(
+				source: sourceCompatibility,
+				target: targetCompatibility,
+				destDir: sourceSets.main.output.classesDir.absolutePath,
+				maxmem: "512m",
+				fork: "true", 
+				aspectPath: getAspectPaths(),
+				inpath: getInPaths(),
+				classpath: configurations.compile.asPath
+		){
+			srcdir {
 				sourceSets.main.java.srcDirs.each{
 					pathelement(location:it.absolutePath)
 				}
@@ -66,21 +111,22 @@ if (hasProperty("android")) {
 
 			ant.taskdef( resource:"org/aspectj/tools/ant/taskdefs/aspectjTaskdefs.properties", classpath: configurations.ajc.asPath)
 			ant.iajc (
-					source:sourceCompatibility,
-					target:targetCompatibility,
-					destDir:"${project.buildDir}/classes/${variant.dirName}",
-					maxmem:"512m",
-					fork:"true",
-					aspectPath:configurations.aspects.asPath,
-					inpath:configurations.ajInpath.asPath,
-					sourceRootCopyFilter:"**/.svn/*,**/*.java",
-					classpath:iajcClasspath
+					source: sourceCompatibility,
+					target: targetCompatibility,
+					destDir: "${project.buildDir}/classes/${variant.dirName}",
+					maxmem: "512m",
+					fork: "true",
+					aspectPath: getAspectPaths(),
+					inpath: getInPaths(),
+					classpath: iajcClasspath,
+					includes: aspectj.ajIncludes,
+					//excludes: aspectj.ajExcludes
 			){
-				sourceroots{
+				srcdir {
 					// Looping over "sourceSets.main.java.srcDirs.each" seems to include some
 					// false folders when using a non-standard folder structure.
-					// For this reason you need to set "ajSourceRoots" in your dependencies.
-					configurations.ajSourceRoots.each {File file ->
+					// For this reason you need to set "ajSourceDirectories" in your dependencies.
+					aspectj.ajSourceDirectories.each {File file ->
 						pathelement(location:file.absolutePath);
 					}
 					pathelement(location:"${project.buildDir}/source/r/${variant.dirName}")
