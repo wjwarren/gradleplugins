@@ -46,7 +46,7 @@ task compileJava(dependsOn: JavaPlugin.PROCESS_RESOURCES_TASK_NAME, overwrite: t
 				target: targetCompatibility,
 				destDir: sourceSets.main.output.classesDir.absolutePath,
 				maxmem: "512m",
-				fork: "true", 
+				fork: "true",
 				aspectPath: getAspectPaths(),
 				inpath: getInPaths(),
 				classpath: configurations.compile.asPath,
@@ -109,7 +109,7 @@ if (hasProperty("android")) {
 			def iajcClasspath = configurations.compile.asPath + ";" + androidSdk
 			configurations.compile.dependencies.each { dep ->
 				if(dep.hasProperty("dependencyProject")) {
-					iajcClasspath += ":" + dep.dependencyProject.buildDir + "/bundles/release/classes.jar"
+					iajcClasspath += ";" + dep.dependencyProject.buildDir + "/bundles/release/classes.jar"
 				}
 			}
 
@@ -133,7 +133,10 @@ if (hasProperty("android")) {
 					aspectj.ajSourceDirectories.each {File file ->
 						pathelement(location:file.absolutePath);
 					}
+					// R class
 					pathelement(location:"${project.buildDir}/source/r/${variant.dirName}")
+					// BuildConfig class
+					pathelement(location:"${project.buildDir}/source/buildConfig/${variant.dirName}")
 				}
 			}
 		}
