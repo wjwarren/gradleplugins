@@ -6,8 +6,8 @@ repositories {
 }
 
 dependencies{
-	ajc "aspectj:aspectjtools:1.5.3"
-	compile "aspectj:aspectjrt:1.5.3"
+	ajc "org.aspectj:aspectjtools:1.7.3"
+	compile "org.aspectj:aspectjrt:1.7.3"
 	testCompile "junit:junit:4.7"
 	testCompile "org.mockito:mockito-all:1.8.2"
 }
