@@ -106,7 +106,15 @@ if (hasProperty("android")) {
 		variant.javaCompile.doLast {
 			def androidSdk = android.adbExe.parent + "/../platforms/" + android.compileSdkVersion + "/android.jar"
 
-			def iajcClasspath = configurations.compile.asPath + ";" + androidSdk
+			def iajcClasspath = androidSdk
+			configurations.compile.each { File file ->
+				// Exclude any AAR files, Java compilers don't understand them.
+				def fileName = file.getName()
+				if (fileName == null || !fileName.endsWith(".aar")) {
+					iajcClasspath += ";" + file.getAbsolutePath()
+				}
+			}
+
 			configurations.compile.dependencies.each { dep ->
 				if(dep.hasProperty("dependencyProject")) {
 					iajcClasspath += ";" + dep.dependencyProject.buildDir + "/bundles/release/classes.jar"
@@ -114,7 +122,7 @@ if (hasProperty("android")) {
 			}
 
 			// Add exploded AAR files.
-			def aarTree = fileTree(dir: "${project.buildDir}/exploded-aar", include: "**/classes.jar")
+			def aarTree = fileTree(dir: "${project.buildDir}/intermediates/exploded-aar", include: "**/classes.jar")
 			aarTree.each { jarFile ->
 				iajcClasspath += ";" + jarFile
 			}
@@ -140,9 +148,9 @@ if (hasProperty("android")) {
 						pathelement(location:file.absolutePath);
 					}
 					// R class
-					pathelement(location:"${project.buildDir}/source/r/${variant.dirName}")
+					pathelement(location:"${project.buildDir}/generated/source/r/${variant.dirName}")
 					// BuildConfig class
-					pathelement(location:"${project.buildDir}/source/buildConfig/${variant.dirName}")
+					pathelement(location:"${project.buildDir}/generated/source/buildConfig/${variant.dirName}")
 				}
 			}
 		}
