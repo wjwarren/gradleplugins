@@ -131,7 +131,7 @@ if (hasProperty("android")) {
 			ant.iajc (
 					source: sourceCompatibility,
 					target: targetCompatibility,
-					destDir: "${project.buildDir}/classes/${variant.dirName}",
+					destDir: "${project.buildDir}/intermediates/classes/${variant.dirName}",
 					maxmem: "512m",
 					fork: "true",
 					aspectPath: getAspectPaths(),
