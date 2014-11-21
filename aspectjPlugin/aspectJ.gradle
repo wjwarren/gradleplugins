@@ -36,6 +36,31 @@ private def getInPaths() {
 	return inPaths;
 }
 
+private def getAndroidSourceSets() {
+	def mainName = "main"
+	def targetName = mainName;
+	def projectFlavorNames = project.("android").productFlavors.collect { it.name }
+	projectFlavorNames = projectFlavorNames.size() != 0 ? projectFlavorNames : [""]
+
+	for (flavorName in projectFlavorNames) {
+		for (taskName in gradle.startParameter.taskNames) {
+			taskName = taskName.toLowerCase()
+			if (taskName.contains(flavorName)) {
+				targetName = flavorName;
+			}
+		}
+	}
+
+	def sourceSets = new ArrayList<String>()
+	sourceSets.add(targetName)
+
+	if (!targetName.equals(mainName)) {
+		sourceSets.add(mainName)
+	}
+
+    return sourceSets
+}
+
 task compileJava(dependsOn: JavaPlugin.PROCESS_RESOURCES_TASK_NAME, overwrite: true)  {
 	dependsOn configurations.ajc.getTaskDependencyFromProjectDependency(true, "compileJava")
 
@@ -141,11 +166,18 @@ if (hasProperty("android")) {
 					excludes: aspectj.ajExcludes,
 			){
 				srcdir {
+					for (source in getAndroidSourceSets()) {
+						android.sourceSets[source].java.srcDirs.each { File file ->
+							if (file.exists()) {
+								pathelement(location:file.absolutePath)
+							}
+						}
+					}
 					// Looping over "sourceSets.main.java.srcDirs.each" seems to include some
 					// false folders when using a non-standard folder structure.
 					// For this reason you need to set "ajSourceDirectories" in your dependencies.
 					aspectj.ajSourceDirectories.each {File file ->
-						pathelement(location:file.absolutePath);
+						pathelement(location:file.absolutePath)
 					}
 					// R class
 					pathelement(location:"${project.buildDir}/generated/source/r/${variant.dirName}")
