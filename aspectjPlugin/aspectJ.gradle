@@ -140,7 +140,7 @@ if (hasProperty("android")) {
 
 			configurations.compile.dependencies.each { dep ->
 				if(dep.hasProperty("dependencyProject")) {
-					iajcClasspath += ";" + dep.dependencyProject.buildDir + "/bundles/release/classes.jar"
+					iajcClasspath += ";" + dep.dependencyProject.buildDir + "/intermediates/bundles/release/classes.jar"
 				}
 			}
 
