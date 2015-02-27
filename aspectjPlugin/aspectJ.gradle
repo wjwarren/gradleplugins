@@ -145,7 +145,7 @@ if (hasProperty("android")) {
 			}
 
 			// Add exploded AAR files.
-			def aarTree = fileTree(dir: "${project.buildDir}/intermediates/exploded-aar", include: "**/classes.jar")
+			def aarTree = fileTree(dir: "${project.buildDir}/intermediates/exploded-aar", include: "**/*.jar")
 			aarTree.each { jarFile ->
 				iajcClasspath += ";" + jarFile
 			}
