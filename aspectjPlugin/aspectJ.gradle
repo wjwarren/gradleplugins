@@ -150,6 +150,9 @@ if (hasProperty("android")) {
 				iajcClasspath += ";" + jarFile
 			}
 
+			// APT
+			iajcClasspath += ";${project.buildDir}/intermediates/classes/${variant.dirName}"
+
 			ant.taskdef( resource:"org/aspectj/tools/ant/taskdefs/aspectjTaskdefs.properties", classpath: configurations.ajc.asPath)
 			ant.iajc (
 					source: sourceCompatibility,
